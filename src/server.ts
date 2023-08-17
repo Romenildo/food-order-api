@@ -35,7 +35,7 @@ app.get("/api/foods/search/:searchTerm", (req, res)=>{
 })
 
 //get food by id
-app.get("/api/foods/:foodId", (req, res)=>{
+app.get("/api/foods/id/:foodId", (req, res)=>{
     const foodId = req.params.foodId;
     const food = foods.find(food=> food.id == foodId)
 
