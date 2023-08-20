@@ -5,10 +5,15 @@
 */
 import express from "express"
 import cors from "cors"
-import { foods, tags } from "./data"
+import jwt from "jsonwebtoken"
+
+import { foods, sample_users, tags } from "./data"
 
 //instancia um novo servidor do express
 const app = express();
+
+//para receber valores JSON via post é necessario permitir
+app.use(express.json())
 
 //adiciona o cors do front
 app.use(cors({
@@ -55,6 +60,40 @@ app.get("/api/foods/tags/:tagName", (req, res)=>{
 
     res.send(tags_foods)
 })
+
+
+app.post("/api/users/login", (req, res)=>{
+    const { email, password } = req.body
+    //verificar se o email e senha passados como parametro é igual ao do usuario cadastrado
+    const user = sample_users.find(user => user.email === email && user.password === password)
+
+    //caso encontre o usuario envia um token valido
+    if(user){
+        res.send(generateTokenResponse(user))
+    }else{
+        res.status(400).send("User name or password is not valid!")
+    }
+})
+
+
+
+const generateTokenResponse = (user:any)=>{
+
+    //criar o token sign recebe dois parametros
+    //1º o valor que vai esta no token no caso email e se ele é admin
+    //2º o segredo que deve esta no .env
+    //3º ooptins, para expirar em 30dias
+
+    const token = jwt.sign({
+        email: user.email,
+        isAdmin: user.isAdmin
+    },"RandomText",
+    {expiresIn: "30d"}
+    )
+
+    user.token = token
+    return user;
+}
 
 //adicionando a porta ao servidor para escutar as requisicoes
 const port = 5000
